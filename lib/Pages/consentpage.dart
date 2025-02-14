@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:krestelvpn/Pages/loginpage.dart';
+import 'package:krestelvpn/Pages/guestpage.dart';
 
 class ConsentPage extends StatelessWidget {
   const ConsentPage({super.key});
@@ -7,20 +7,20 @@ class ConsentPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Expanded(
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0xFF000000), Color(0xFF000000)],
-            ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF000000), Color(0xFF000000)],
           ),
+        ),
+        child: SafeArea(
           child: SingleChildScrollView(
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(top: 60.0, bottom: 40),
+                  padding: const EdgeInsets.only(top: 5.0, bottom: 40),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -28,9 +28,7 @@ class ConsentPage extends StatelessWidget {
                         "assets/images/krestel.png",
                         scale: 3,
                       ),
-                      const SizedBox(
-                        width: 10,
-                      ),
+                      const SizedBox(width: 10),
                       const Text(
                         "Kestrel VPN",
                         style: TextStyle(
@@ -46,9 +44,7 @@ class ConsentPage extends StatelessWidget {
                   "assets/images/handshake.png",
                   scale: 2,
                 ),
-                const SizedBox(
-                  height: 10,
-                ),
+                const SizedBox(height: 10),
                 const Text(
                   "Usage Consent",
                   style: TextStyle(
@@ -56,9 +52,7 @@ class ConsentPage extends StatelessWidget {
                     fontSize: 16,
                   ),
                 ),
-                const SizedBox(
-                  height: 20,
-                ),
+                const SizedBox(height: 20),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 30),
                   child: Container(
@@ -70,65 +64,62 @@ class ConsentPage extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 30),
                   child: Column(
-                    children: [
+                    children: const [
                       BulletPoint(
-                        text:
-                            'By using Kestrel VPN, you agree not to engage in illegal activities.',
+                        text: 'By using Kestrel VPN, you agree not to engage in illegal activities.',
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12),
                       BulletPoint(
-                        text:
-                            'We do not log browsing activities but collect non-personal information for analytics.',
+                        text: 'We do not log browsing activities but collect non-personal information for analytics.',
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12),
                       BulletPoint(
-                        text:
-                            'The app is provided \'as-is\' without warranties, and we are not liable for any damages.',
+                        text: 'The app is provided \'as-is\' without warranties, and we are not liable for any damages.',
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12),
                       BulletPoint(
                         text: 'Misuse of VPN will surely result in suspension.',
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12),
                       BulletPoint(
                         text: 'You must be of legal age as per your country.',
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12),
                       BulletPoint(
-                        text:
-                            'The VPN service may face disruptions, and we are not liable for damages or losses.',
+                        text: 'The VPN service may face disruptions, and we are not liable for damages or losses.',
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12),
                       BulletPoint(
-                        text:
-                            'We may suspend or terminate your access for any misuse or violation of terms.',
+                        text: 'We may suspend or terminate your access for any misuse or violation of terms.',
                       ),
                     ],
                   ),
                 ),
-                SizedBox(
-                  height: 35,
-                ),
+                const SizedBox(height: 35),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
                   child: GradientButton(
                     onPressed: () {
-                      // Navigate to next screen or handle consent
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (context) => LogInPage()),
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => const GuestPage()),
+                        (route) => false,
                       );
                     },
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 22.0, vertical: 15.0),
-                  child: Text(
+                    horizontal: 22.0,
+                    vertical: 15.0,
+                  ),
+                  child: const Text(
                     "By continuing, you agree to our Terms of Service and Privacy Policy",
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.white70,
                       fontSize: 8,
                     ),
+                    textAlign: TextAlign.center,
                   ),
                 ),
               ],
@@ -169,7 +160,6 @@ class BulletPoint extends StatelessWidget {
             style: const TextStyle(
               color: Colors.white70,
               fontSize: 14,
-              // height: 1.5,
             ),
           ),
         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:krestelvpn/Pages/premiumpage.dart';
 import 'package:krestelvpn/Pages/serverspage.dart';
+import 'package:krestelvpn/Providers/authProvider.dart';
 import 'package:krestelvpn/Providers/homeProvider.dart';
 import 'package:provider/provider.dart';
 
@@ -22,6 +23,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);  
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -248,6 +250,35 @@ class _HomePageState extends State<HomePage> {
                           )
                         ],
                       ),
+                      SizedBox(height: 35,),
+                      GestureDetector(
+                        onTap:  () => authProvider.logOut(context),
+                        child: Row(
+                          children: [
+                            Icon(Icons.logout, color: Colors.white,),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Log Out",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      fontSize: 18),
+                                ),
+                                Text(
+                                  "Please logout to secure your data",
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 12),
+                                ),
+                              ],
+                            )
+                          ],
+                        ),
+                      )
                     ],
                   ),
                 )

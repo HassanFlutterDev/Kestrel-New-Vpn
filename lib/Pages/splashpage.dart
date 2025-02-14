@@ -1,15 +1,23 @@
-// ignore_for_file: unrelated_type_equality_checks
 import 'package:flutter/material.dart';
+import 'package:krestelvpn/Pages/homepage.dart';
 import 'package:krestelvpn/Pages/consentpage.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashPage extends StatelessWidget {
   const SplashPage({super.key});
 
-  Future<bool> _checkConnection() async {
-    var connectivityResult = await (Connectivity().checkConnectivity());
-    // Return true if connected (wifi or mobile), false if no connection
-    return connectivityResult != ConnectivityResult.none;
+  Future<Map<String, dynamic>> _checkInitialConditions() async {
+    // Check both connection and login status simultaneously
+    final connectivityResult = await Connectivity().checkConnectivity();
+    final prefs = await SharedPreferences.getInstance();
+    final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+    final token = prefs.getString('token');
+
+    return {
+      'hasConnection': connectivityResult != ConnectivityResult.none,
+      'isLoggedIn': isLoggedIn && token != null, // Ensure both are present
+    };
   }
 
   @override
@@ -25,18 +33,14 @@ class SplashPage extends StatelessWidget {
         ),
         child: Column(
           children: [
-            SizedBox(
-              height: 350,
-            ),
+            const SizedBox(height: 350),
             Column(
               children: [
                 Image.asset(
                   "assets/images/krestel.png",
                   scale: 2,
                 ),
-                const SizedBox(
-                  height: 10,
-                ),
+                const SizedBox(height: 10),
                 const Center(
                   child: Text(
                     'The Ultimate Secure Browsing',
@@ -49,77 +53,74 @@ class SplashPage extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(
-              height: 300,
-            ),
-            // ... existing imports and code ...
-
-            FutureBuilder(
-              future: Future.delayed(const Duration(seconds: 3))
-                  .then((_) => _checkConnection()),
+            const SizedBox(height: 300),
+            FutureBuilder<Map<String, dynamic>>(
+              future: Future.delayed(
+                const Duration(seconds: 3),
+                _checkInitialConditions,
+              ),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.done) {
-                  if (snapshot.data == true) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (context) => ConsentPage(),
-                        ),
-                      );
-                    });
-                   // return Column(
-                    //   children: [
-                    //     const CircularProgressIndicator(
-                    //       strokeWidth: 3,
-                    //       valueColor:
-                    //           AlwaysStoppedAnimation<Color>(Color(0xFFffffff)),
-                    //     ),
-                    //     Text("Version 1.0.0",
-                    //         style:
-                    //             TextStyle(color: Colors.white, fontSize: 12)),
-                    //   ],
-                    // );
-                  } else {
-                    print('No Internet Connection');
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.error, color: Colors.red),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            const Text(
-                              'Please check your internet connection',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
+                  if (snapshot.hasData) {
+                    final data = snapshot.data!;
+                    if (!data['hasConnection']) {
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(Icons.error, color: Colors.red),
+                              SizedBox(width: 10),
+                              Text(
+                                'Please check your internet connection',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        Text("Version 1.0.0",
-                            style:
-                                TextStyle(color: Colors.white, fontSize: 12)),
-                      ],
-                    );
+                            ],
+                          ),
+                          const Text(
+                            "Version 1.0.0",
+                            style: TextStyle(color: Colors.white, fontSize: 12),
+                          ),
+                        ],
+                      );
+                    }
+
+                    // Navigate based on login status
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (data['isLoggedIn']) {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => const HomePage()),
+                          (route) => false,
+                        );
+                      } else {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => const ConsentPage()),
+                          (route) => false,
+                        );
+                      }
+                    });
                   }
                 }
+                
+                // Loading state
                 return Column(
-                  children: [
-                    const CircularProgressIndicator(
+                  children: const [
+                    CircularProgressIndicator(
                       strokeWidth: 3,
-                      valueColor:
-                          AlwaysStoppedAnimation<Color>(Color(0xFFffffff)),
+                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFffffff)),
                     ),
-                    SizedBox(
-                      height: 10,
+                    SizedBox(height: 10),
+                    Text(
+                      "Version 1.0.0",
+                      style: TextStyle(color: Colors.white, fontSize: 12),
                     ),
-                    Text("Version 1.0.0",
-                        style: TextStyle(color: Colors.white, fontSize: 12)),
                   ],
                 );
               },
