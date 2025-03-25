@@ -62,28 +62,37 @@ class ForgetPage extends StatelessWidget {
         SizedBox(
           height: 30,
         ),
-        Container(
-          width: double.infinity,
-          height: 50,
-          padding: EdgeInsets.symmetric(vertical: 12),
-          margin: EdgeInsets.symmetric(horizontal: 20),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(36),
-            gradient: LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: [Color(0xFFFF335E), Color(0xFF0070FF)],
-            ),
-          ),
-          child: Center(
-            child: Text("Submit",
-                style: TextStyle(
+        Consumer<AuthProvider>(builder: (context, authProvider, child) {
+          return authProvider.isloading
+              ? CircularProgressIndicator(
                   color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                )),
-          ),
-        ),
+                )
+              : GestureDetector(
+                  onTap: () => homeProvider.forgotPassword(context),
+                  child: Container(
+                    width: double.infinity,
+                    height: 50,
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    margin: EdgeInsets.symmetric(horizontal: 20),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(36),
+                      gradient: LinearGradient(
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                        colors: [Color(0xFFFF335E), Color(0xFF0070FF)],
+                      ),
+                    ),
+                    child: Center(
+                      child: Text("Submit",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          )),
+                    ),
+                  ),
+                );
+        }),
         SizedBox(
           height: 20,
         ),

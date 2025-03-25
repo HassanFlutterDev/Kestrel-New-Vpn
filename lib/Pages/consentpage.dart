@@ -8,6 +8,7 @@ class ConsentPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
+        height: MediaQuery.of(context).size.height,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -66,15 +67,18 @@ class ConsentPage extends StatelessWidget {
                   child: Column(
                     children: const [
                       BulletPoint(
-                        text: 'By using Kestrel VPN, you agree not to engage in illegal activities.',
+                        text:
+                            'By using Kestrel VPN, you agree not to engage in illegal activities.',
                       ),
                       SizedBox(height: 12),
                       BulletPoint(
-                        text: 'We do not log browsing activities but collect non-personal information for analytics.',
+                        text:
+                            'We do not log browsing activities but collect non-personal information for analytics.',
                       ),
                       SizedBox(height: 12),
                       BulletPoint(
-                        text: 'The app is provided \'as-is\' without warranties, and we are not liable for any damages.',
+                        text:
+                            'The app is provided \'as-is\' without warranties, and we are not liable for any damages.',
                       ),
                       SizedBox(height: 12),
                       BulletPoint(
@@ -86,11 +90,13 @@ class ConsentPage extends StatelessWidget {
                       ),
                       SizedBox(height: 12),
                       BulletPoint(
-                        text: 'The VPN service may face disruptions, and we are not liable for damages or losses.',
+                        text:
+                            'The VPN service may face disruptions, and we are not liable for damages or losses.',
                       ),
                       SizedBox(height: 12),
                       BulletPoint(
-                        text: 'We may suspend or terminate your access for any misuse or violation of terms.',
+                        text:
+                            'We may suspend or terminate your access for any misuse or violation of terms.',
                       ),
                     ],
                   ),
@@ -102,7 +108,8 @@ class ConsentPage extends StatelessWidget {
                     onPressed: () {
                       Navigator.pushAndRemoveUntil(
                         context,
-                        MaterialPageRoute(builder: (context) => const GuestPage()),
+                        MaterialPageRoute(
+                            builder: (context) => const GuestPage()),
                         (route) => false,
                       );
                     },

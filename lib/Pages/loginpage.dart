@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:krestelvpn/Pages/homepage.dart';
 import 'package:krestelvpn/Pages/signuppage.dart';
 import 'package:provider/provider.dart';
 import 'package:krestelvpn/Pages/forgetpage.dart';
 import 'package:krestelvpn/Providers/authProvider.dart';
 import 'package:krestelvpn/Widgets/customTextField.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LogInPage extends StatefulWidget {
   const LogInPage({super.key});
@@ -151,33 +153,65 @@ class _LogInPageState extends State<LogInPage> {
             SizedBox(
               height: 25,
             ),
+            Consumer<AuthProvider>(builder: (context, authProvider, child) {
+              return authProvider.isloading
+                  ? CircularProgressIndicator(
+                      color: Colors.white,
+                    )
+                  : GestureDetector(
+                      onTap: () => homeProvider.loginUser(context),
+                      child: Container(
+                        width: double.infinity,
+                        height: 50,
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        margin: EdgeInsets.symmetric(horizontal: 20),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(36),
+                          gradient: LinearGradient(
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                            colors: [Color(0xFFFF335E), Color(0xFF0070FF)],
+                          ),
+                        ),
+                        child: Center(
+                          child: Text("Login",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              )),
+                        ),
+                      ),
+                    );
+            }),
+            const SizedBox(height: 20),
             GestureDetector(
-              onTap: () => homeProvider.loginUser(context),
+              onTap: () async {
+                final prefs = await SharedPreferences.getInstance();
+                prefs.setBool('onBoard', true);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => HomePage()),
+                );
+              },
               child: Container(
-                width: double.infinity,
                 height: 50,
-                padding: EdgeInsets.symmetric(vertical: 12),
+                width: double.infinity,
                 margin: EdgeInsets.symmetric(horizontal: 20),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(36),
-                  gradient: LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: [Color(0xFFFF335E), Color(0xFF0070FF)],
-                  ),
+                  color: Colors.grey[500],
+                  borderRadius: BorderRadius.circular(24),
                 ),
                 child: Center(
-                  child: Text("Login",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      )),
-                ),
+                    child: const Text(
+                  "Continue As Guest",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, color: Colors.white),
+                )),
               ),
             ),
             SizedBox(
-              height: MediaQuery.of(context).size.height * 0.32,
+              height: MediaQuery.of(context).size.height * 0.22,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -190,7 +224,7 @@ class _LogInPageState extends State<LogInPage> {
                   ),
                 ),
                 GestureDetector(
-                  onTap: () => Navigator.pushReplacement(
+                  onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => SignUpPage(),

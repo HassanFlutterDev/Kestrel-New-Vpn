@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:krestelvpn/Pages/homepage.dart';
 import 'package:krestelvpn/Pages/loginpage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class GuestPage extends StatefulWidget {
   const GuestPage({super.key});
@@ -31,16 +32,16 @@ class _GuestPageState extends State<GuestPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text(
-                  "Welcome to Krestel VPN",
+                  "Welcome to Kestrel VPN",
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 20,
-                    fontWeight:  FontWeight.bold,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 20),
                 const Text(
-                  "Krestel VPN is a free VPN service that allows you to access the internet securely & anonymously. \n By using Krestel VPN, you agree to our Terms of Service and Privacy Policy.",
+                  "Kestrel VPN is a free VPN service that allows you to access the internet securely & anonymously. \nBy using Kestrel VPN, you agree to our Terms of Service and Privacy Policy.",
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 14,
@@ -48,7 +49,9 @@ class _GuestPageState extends State<GuestPage> {
                 ),
                 const SizedBox(height: 20),
                 GestureDetector(
-                  onTap: () {
+                  onTap: () async {
+                    final prefs = await SharedPreferences.getInstance();
+                    prefs.setBool('onBoard', true);
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(builder: (context) => HomePage()),

@@ -141,13 +141,6 @@ class _SignUpPageState extends State<SignUpPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Checkbox(
-                        value: true,
-                        onChanged: (value) {},
-                        activeColor: Colors.blue,
-                        checkColor: Colors.white,
-                        side: BorderSide(color: Colors.white),
-                      ),
                       Text(
                           """Password must be at least 8 character, uppercase, \n lowercase, and unique code like #%!""",
                           style: TextStyle(color: Colors.white, fontSize: 10)),
@@ -159,33 +152,39 @@ class _SignUpPageState extends State<SignUpPage> {
             SizedBox(
               height: 25,
             ),
-            GestureDetector(
-              onTap: () {
-                homeProvider.registerUser(context);
-              },
-              child: Container(
-                width: double.infinity,
-                height: 50,
-                padding: EdgeInsets.symmetric(vertical: 12),
-                margin: EdgeInsets.symmetric(horizontal: 20),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(36),
-                  gradient: LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: [Color(0xFFFF335E), Color(0xFF0070FF)],
-                  ),
-                ),
-                child: Center(
-                  child: Text("Sign Up",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      )),
-                ),
-              ),
-            ),
+            Consumer<AuthProvider>(builder: (context, authProvider, child) {
+              return authProvider.isloading
+                  ? CircularProgressIndicator(
+                      color: Colors.white,
+                    )
+                  : GestureDetector(
+                      onTap: () {
+                        homeProvider.registerUser(context);
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        height: 50,
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        margin: EdgeInsets.symmetric(horizontal: 20),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(36),
+                          gradient: LinearGradient(
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                            colors: [Color(0xFFFF335E), Color(0xFF0070FF)],
+                          ),
+                        ),
+                        child: Center(
+                          child: Text("Sign Up",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              )),
+                        ),
+                      ),
+                    );
+            }),
             SizedBox(
               height: MediaQuery.of(context).size.height * 0.20,
             ),
@@ -200,7 +199,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                 ),
                 GestureDetector(
-                  onTap: () => Navigator.pushReplacement(
+                  onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => LogInPage(),
