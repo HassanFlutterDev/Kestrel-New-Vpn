@@ -12,9 +12,16 @@
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
 		3A995BDEFD85FB58DAD74CD4 /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B809289EAFEA6F05885BAD53 /* Pods_RunnerTests.framework */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
+		5C2B6E1C2DBD36050090D626 /* WireGuardKit in Frameworks */ = {isa = PBXBuildFile; productRef = 5C2B6E1B2DBD36050090D626 /* WireGuardKit */; };
 		5C443F2B2D61143E00AE404A /* SaveKeychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C443F2A2D61143400AE404A /* SaveKeychain.swift */; };
 		5C443F2D2D61147D00AE404A /* StateHandle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C443F2C2D61146C00AE404A /* StateHandle.swift */; };
 		5C443F2F2D611A8200AE404A /* ByteHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C443F2E2D611A7B00AE404A /* ByteHandler.swift */; };
+		5CAD7EFA2DCFEF2400DAD963 /* NetworkExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C443F372D62487400AE404A /* NetworkExtension.framework */; };
+		5CAD7F022DCFEF2400DAD963 /* VPNExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 5CAD7EF92DCFEF2400DAD963 /* VPNExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		5CAD7F102DCFEF8900DAD963 /* WireGuardKit in Frameworks */ = {isa = PBXBuildFile; productRef = 5CAD7F0F2DCFEF8900DAD963 /* WireGuardKit */; };
+		5CAD7F152DCFEF9D00DAD963 /* PacketTunnelProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CAD7F122DCFEF9D00DAD963 /* PacketTunnelProvider.swift */; };
+		5CAD7F182DCFF0A100DAD963 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5CAD7F172DCFF0A100DAD963 /* StoreKit.framework */; };
+		5CAD7F1A2DCFF14700DAD963 /* CustomTunnelHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CAD7F192DCFF14700DAD963 /* CustomTunnelHandler.swift */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
@@ -29,6 +36,20 @@
 			remoteGlobalIDString = 97C146ED1CF9000F007C117D;
 			remoteInfo = Runner;
 		};
+		5CAD7F002DCFEF2400DAD963 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5CAD7EF82DCFEF2400DAD963;
+			remoteInfo = VPNExtension;
+		};
+		5CAD7F0D2DCFEF8100DAD963 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5CAD7F082DCFEF7300DAD963;
+			remoteInfo = tunnel;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -38,6 +59,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
+				5CAD7F022DCFEF2400DAD963 /* VPNExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -66,6 +88,12 @@
 		5C443F2C2D61146C00AE404A /* StateHandle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateHandle.swift; sourceTree = "<group>"; };
 		5C443F2E2D611A7B00AE404A /* ByteHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ByteHandler.swift; sourceTree = "<group>"; };
 		5C443F372D62487400AE404A /* NetworkExtension.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NetworkExtension.framework; path = System/Library/Frameworks/NetworkExtension.framework; sourceTree = SDKROOT; };
+		5CAD7EF92DCFEF2400DAD963 /* VPNExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = VPNExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		5CAD7F112DCFEF9D00DAD963 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		5CAD7F122DCFEF9D00DAD963 /* PacketTunnelProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PacketTunnelProvider.swift; sourceTree = "<group>"; };
+		5CAD7F132DCFEF9D00DAD963 /* VPNExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VPNExtension.entitlements; sourceTree = "<group>"; };
+		5CAD7F172DCFF0A100DAD963 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
+		5CAD7F192DCFF14700DAD963 /* CustomTunnelHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTunnelHandler.swift; sourceTree = "<group>"; };
 		5CE1CF8D2D68DFDE0032CBA2 /* Leaf.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Leaf.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -91,10 +119,21 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		5CAD7EF62DCFEF2400DAD963 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5CAD7F102DCFEF8900DAD963 /* WireGuardKit in Frameworks */,
+				5CAD7EFA2DCFEF2400DAD963 /* NetworkExtension.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		97C146EB1CF9000F007C117D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5CAD7F182DCFF0A100DAD963 /* StoreKit.framework in Frameworks */,
+				5C2B6E1C2DBD36050090D626 /* WireGuardKit in Frameworks */,
 				31FEC527AE0D0343F0D729C9 /* Pods_Runner.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -137,6 +176,7 @@
 		53E13201755ABF5828E398DD /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				5CAD7F172DCFF0A100DAD963 /* StoreKit.framework */,
 				5CE1CF8D2D68DFDE0032CBA2 /* Leaf.framework */,
 				DACD15FF6A0FB1A5A1DAB2B5 /* Pods_Runner.framework */,
 				B809289EAFEA6F05885BAD53 /* Pods_RunnerTests.framework */,
@@ -144,6 +184,16 @@
 				FFA9AFB1E90ED6D09FDA60BE /* Pods_PacketTunnel.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		5CAD7F142DCFEF9D00DAD963 /* VPNExtension */ = {
+			isa = PBXGroup;
+			children = (
+				5CAD7F112DCFEF9D00DAD963 /* Info.plist */,
+				5CAD7F122DCFEF9D00DAD963 /* PacketTunnelProvider.swift */,
+				5CAD7F132DCFEF9D00DAD963 /* VPNExtension.entitlements */,
+			);
+			path = VPNExtension;
 			sourceTree = "<group>";
 		};
 		9740EEB11CF90186004384FC /* Flutter */ = {
@@ -162,6 +212,7 @@
 			children = (
 				9740EEB11CF90186004384FC /* Flutter */,
 				97C146F01CF9000F007C117D /* Runner */,
+				5CAD7F142DCFEF9D00DAD963 /* VPNExtension */,
 				97C146EF1CF9000F007C117D /* Products */,
 				331C8082294A63A400263BE5 /* RunnerTests */,
 				51DC29BAE09C465C0C5ABD7F /* Pods */,
@@ -174,6 +225,7 @@
 			children = (
 				97C146EE1CF9000F007C117D /* Runner.app */,
 				331C8081294A63A400263BE5 /* RunnerTests.xctest */,
+				5CAD7EF92DCFEF2400DAD963 /* VPNExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -181,6 +233,7 @@
 		97C146F01CF9000F007C117D /* Runner */ = {
 			isa = PBXGroup;
 			children = (
+				5CAD7F192DCFF14700DAD963 /* CustomTunnelHandler.swift */,
 				5C443F2E2D611A7B00AE404A /* ByteHandler.swift */,
 				5C443F2C2D61146C00AE404A /* StateHandle.swift */,
 				5C443F2A2D61143400AE404A /* SaveKeychain.swift */,
@@ -198,6 +251,23 @@
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
+
+/* Begin PBXLegacyTarget section */
+		5CAD7F082DCFEF7300DAD963 /* tunnel */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "$(ACTION)";
+			buildConfigurationList = 5CAD7F092DCFEF7300DAD963 /* Build configuration list for PBXLegacyTarget "tunnel" */;
+			buildPhases = (
+			);
+			buildToolPath = /usr/bin/make;
+			buildWorkingDirectory = "/Users/hassan/Downloads/wireguard-apple-master/Sources/WireGuardKitGo";
+			dependencies = (
+			);
+			name = tunnel;
+			passBuildSettingsInEnvironment = 1;
+			productName = tunnel;
+		};
+/* End PBXLegacyTarget section */
 
 /* Begin PBXNativeTarget section */
 		331C8080294A63A400263BE5 /* RunnerTests */ = {
@@ -219,11 +289,33 @@
 			productReference = 331C8081294A63A400263BE5 /* RunnerTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		5CAD7EF82DCFEF2400DAD963 /* VPNExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5CAD7F042DCFEF2400DAD963 /* Build configuration list for PBXNativeTarget "VPNExtension" */;
+			buildPhases = (
+				5CAD7EF52DCFEF2400DAD963 /* Sources */,
+				5CAD7EF62DCFEF2400DAD963 /* Frameworks */,
+				5CAD7EF72DCFEF2400DAD963 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5CAD7F0E2DCFEF8100DAD963 /* PBXTargetDependency */,
+			);
+			name = VPNExtension;
+			packageProductDependencies = (
+				5CAD7F0F2DCFEF8900DAD963 /* WireGuardKit */,
+			);
+			productName = VPNExtension;
+			productReference = 5CAD7EF92DCFEF2400DAD963 /* VPNExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		97C146ED1CF9000F007C117D /* Runner */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 97C147051CF9000F007C117D /* Build configuration list for PBXNativeTarget "Runner" */;
 			buildPhases = (
 				AE3BDB61D00B842C0AA292B0 /* [CP] Check Pods Manifest.lock */,
+				5C443F462D62487400AE404A /* Embed Foundation Extensions */,
 				9740EEB61CF901F6004384FC /* Run Script */,
 				97C146EA1CF9000F007C117D /* Sources */,
 				97C146EB1CF9000F007C117D /* Frameworks */,
@@ -231,11 +323,11 @@
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				E80CED066FF5F939F24E7121 /* [CP] Embed Pods Frameworks */,
-				5C443F462D62487400AE404A /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				5CAD7F012DCFEF2400DAD963 /* PBXTargetDependency */,
 			);
 			name = Runner;
 			productName = Runner;
@@ -249,13 +341,19 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastSwiftUpdateCheck = 1620;
+				LastSwiftUpdateCheck = 1630;
 				LastUpgradeCheck = 1510;
 				ORGANIZATIONNAME = "";
 				TargetAttributes = {
 					331C8080294A63A400263BE5 = {
 						CreatedOnToolsVersion = 14.0;
 						TestTargetID = 97C146ED1CF9000F007C117D;
+					};
+					5CAD7EF82DCFEF2400DAD963 = {
+						CreatedOnToolsVersion = 16.3;
+					};
+					5CAD7F082DCFEF7300DAD963 = {
+						CreatedOnToolsVersion = 16.3;
 					};
 					97C146ED1CF9000F007C117D = {
 						CreatedOnToolsVersion = 7.3.1;
@@ -272,18 +370,30 @@
 				Base,
 			);
 			mainGroup = 97C146E51CF9000F007C117D;
+			packageReferences = (
+				5C2B6E1A2DBD36050090D626 /* XCRemoteSwiftPackageReference "wireguard-apple" */,
+			);
 			productRefGroup = 97C146EF1CF9000F007C117D /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				97C146ED1CF9000F007C117D /* Runner */,
 				331C8080294A63A400263BE5 /* RunnerTests */,
+				5CAD7EF82DCFEF2400DAD963 /* VPNExtension */,
+				5CAD7F082DCFEF7300DAD963 /* tunnel */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		331C807F294A63A400263BE5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5CAD7EF72DCFEF2400DAD963 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -407,6 +517,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		5CAD7EF52DCFEF2400DAD963 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5CAD7F152DCFEF9D00DAD963 /* PacketTunnelProvider.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		97C146EA1CF9000F007C117D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -415,6 +533,7 @@
 				5C443F2F2D611A8200AE404A /* ByteHandler.swift in Sources */,
 				5C443F2D2D61147D00AE404A /* StateHandle.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
+				5CAD7F1A2DCFF14700DAD963 /* CustomTunnelHandler.swift in Sources */,
 				5C443F2B2D61143E00AE404A /* SaveKeychain.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -426,6 +545,16 @@
 			isa = PBXTargetDependency;
 			target = 97C146ED1CF9000F007C117D /* Runner */;
 			targetProxy = 331C8085294A63A400263BE5 /* PBXContainerItemProxy */;
+		};
+		5CAD7F012DCFEF2400DAD963 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5CAD7EF82DCFEF2400DAD963 /* VPNExtension */;
+			targetProxy = 5CAD7F002DCFEF2400DAD963 /* PBXContainerItemProxy */;
+		};
+		5CAD7F0E2DCFEF8100DAD963 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5CAD7F082DCFEF7300DAD963 /* tunnel */;
+			targetProxy = 5CAD7F0D2DCFEF8100DAD963 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -496,6 +625,7 @@
 				INSTALL_OWNER = hassan;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
+				PATH = "${PATH}::/opt/homebrew/Cellar/go/1.22.2/libexec/bin";
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -514,13 +644,32 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = K994367L88;
 				ENABLE_BITCODE = NO;
+				FLUTTER_BUILD_NAME = 1.0.1;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Kestrel VPN";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INSTALL_OWNER = hassan;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					"\"connectivity_plus\"",
+					"-framework",
+					"\"flutter_internet_speed_test\"",
+					"-framework",
+					"\"in_app_purchase_storekit\"",
+					"-framework",
+					"\"path_provider_foundation\"",
+					"-framework",
+					"\"shared_preferences_foundation\"",
+					"-framework",
+					"\"sqflite_darwin\"",
+					"-framework",
+					"\"url_launcher_ios\"",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.kestralvpn.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -580,6 +729,196 @@
 			};
 			name = Profile;
 		};
+		5CAD7F052DCFEF2400DAD963 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = VPNExtension/VPNExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K994367L88;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = VPNExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = VPNExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kestralvpn.app.VPNExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		5CAD7F062DCFEF2400DAD963 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = VPNExtension/VPNExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K994367L88;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = VPNExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = VPNExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kestralvpn.app.VPNExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		5CAD7F072DCFEF2400DAD963 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = VPNExtension/VPNExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K994367L88;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = VPNExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = VPNExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kestralvpn.app.VPNExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Profile;
+		};
+		5CAD7F0A2DCFEF7300DAD963 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				DEBUGGING_SYMBOLS = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = X27WXWLBY2;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		5CAD7F0B2DCFEF7300DAD963 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = X27WXWLBY2;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_FAST_MATH = YES;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		5CAD7F0C2DCFEF7300DAD963 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = X27WXWLBY2;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_FAST_MATH = YES;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Profile;
+		};
 		97C147031CF9000F007C117D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -634,6 +973,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				PATH = "${PATH}::/opt/homebrew/Cellar/go/1.22.2/libexec/bin";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -686,6 +1026,7 @@
 				INSTALL_OWNER = hassan;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
+				PATH = "${PATH}::/opt/homebrew/Cellar/go/1.22.2/libexec/bin";
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -706,13 +1047,32 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = K994367L88;
 				ENABLE_BITCODE = NO;
+				FLUTTER_BUILD_NAME = 1.0.1;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Kestrel VPN";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INSTALL_OWNER = hassan;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					"\"connectivity_plus\"",
+					"-framework",
+					"\"flutter_internet_speed_test\"",
+					"-framework",
+					"\"in_app_purchase_storekit\"",
+					"-framework",
+					"\"path_provider_foundation\"",
+					"-framework",
+					"\"shared_preferences_foundation\"",
+					"-framework",
+					"\"sqflite_darwin\"",
+					"-framework",
+					"\"url_launcher_ios\"",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.kestralvpn.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -734,13 +1094,32 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = K994367L88;
 				ENABLE_BITCODE = NO;
+				FLUTTER_BUILD_NAME = 1.0.1;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Kestrel VPN";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INSTALL_OWNER = hassan;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					"\"connectivity_plus\"",
+					"-framework",
+					"\"flutter_internet_speed_test\"",
+					"-framework",
+					"\"in_app_purchase_storekit\"",
+					"-framework",
+					"\"path_provider_foundation\"",
+					"-framework",
+					"\"shared_preferences_foundation\"",
+					"-framework",
+					"\"sqflite_darwin\"",
+					"-framework",
+					"\"url_launcher_ios\"",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.kestralvpn.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -759,6 +1138,26 @@
 				331C8088294A63A400263BE5 /* Debug */,
 				331C8089294A63A400263BE5 /* Release */,
 				331C808A294A63A400263BE5 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5CAD7F042DCFEF2400DAD963 /* Build configuration list for PBXNativeTarget "VPNExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5CAD7F052DCFEF2400DAD963 /* Debug */,
+				5CAD7F062DCFEF2400DAD963 /* Release */,
+				5CAD7F072DCFEF2400DAD963 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5CAD7F092DCFEF7300DAD963 /* Build configuration list for PBXLegacyTarget "tunnel" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5CAD7F0A2DCFEF7300DAD963 /* Debug */,
+				5CAD7F0B2DCFEF7300DAD963 /* Release */,
+				5CAD7F0C2DCFEF7300DAD963 /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -784,6 +1183,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		5C2B6E1A2DBD36050090D626 /* XCRemoteSwiftPackageReference "wireguard-apple" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/passepartoutvpn/wireguard-apple";
+			requirement = {
+				kind = exactVersion;
+				version = 1.0.17;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		5C2B6E1B2DBD36050090D626 /* WireGuardKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5C2B6E1A2DBD36050090D626 /* XCRemoteSwiftPackageReference "wireguard-apple" */;
+			productName = WireGuardKit;
+		};
+		5CAD7F0F2DCFEF8900DAD963 /* WireGuardKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5C2B6E1A2DBD36050090D626 /* XCRemoteSwiftPackageReference "wireguard-apple" */;
+			productName = WireGuardKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 97C146E61CF9000F007C117D /* Project object */;
 }

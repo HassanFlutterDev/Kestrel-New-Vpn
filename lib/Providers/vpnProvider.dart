@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'dart:async';
 
 import 'package:http/http.dart';
+import 'package:krestelvpn/Providers/api_services.dart';
 import 'package:krestelvpn/Providers/homeProvider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,6 +18,11 @@ enum VpnState {
   connected, // 2
   disconnecting, // 3
   error // 4
+}
+
+enum VpnProtocol {
+  wireguard,
+  ipsec,
 }
 
 class VpnProvider with ChangeNotifier {
@@ -38,9 +44,14 @@ class VpnProvider with ChangeNotifier {
   String _currentIp = "0.0.0.0";
   bool _isAutoConnectEnabled = false;
   bool _disconnectOnSleep = false;
+  VpnProtocol _protocol = VpnProtocol.wireguard;
+  bool _gettingConfig = false;
 
   // Getters
+  bool get isGettingConfig => _gettingConfig;
+  VpnProtocol get protocol => _protocol;
   VpnState get state => _state;
+
   bool get disconnectOnSleep => _disconnectOnSleep;
   String get currentIp => _currentIp;
   String? get errorMessage => _errorMessage;
@@ -54,6 +65,11 @@ class VpnProvider with ChangeNotifier {
   bool get isAutoConnectEnabled => _isAutoConnectEnabled;
   late SharedPreferences _prefs;
 
+  VpnProvider() {
+    initWireguard();
+    _loadSavedProtocol();
+  }
+
 // Add this initialization method
   Future<void> initializeAutoConnect(BuildContext context) async {
     _prefs = await SharedPreferences.getInstance();
@@ -65,14 +81,21 @@ class VpnProvider with ChangeNotifier {
     if (_isAutoConnectEnabled && _state == VpnState.disconnected) {
       var serverProvider = Provider.of<HomeProvider>(context, listen: false);
       await connect(
-          serverProvider.servers[serverProvider.selectedServerIndex]
-              ['sub_servers'][0]['ipsec_server'],
-          serverProvider.servers[serverProvider.selectedServerIndex]
-              ['sub_servers'][0]['ipsec_user'],
-          serverProvider.servers[serverProvider.selectedServerIndex]
-              ['sub_servers'][0]['ipsec_password'],
-          serverProvider.servers[serverProvider.selectedServerIndex]
-              ['sub_servers'][0]['ipsec_key']);
+        server: serverProvider.servers[serverProvider.selectedServerIndex]
+            ['sub_servers'][0]['ipsec_server'],
+        username: serverProvider.servers[serverProvider.selectedServerIndex]
+            ['sub_servers'][0]['ipsec_user'],
+        password: serverProvider.servers[serverProvider.selectedServerIndex]
+            ['sub_servers'][0]['ipsec_password'],
+        secret: serverProvider.servers[serverProvider.selectedServerIndex]
+            ['sub_servers'][0]['ipsec_key'],
+        userId: serverProvider.servers[serverProvider.selectedServerIndex]
+            ['sub_servers'][0]['user_id'],
+        address: serverProvider.servers[serverProvider.selectedServerIndex]
+            ['sub_servers'][0]['wg_panel_address'],
+        wgPassword: serverProvider.servers[serverProvider.selectedServerIndex]
+            ['sub_servers'][0]['wg_panel_password'],
+      );
     }
     notifyListeners();
   }
@@ -84,25 +107,59 @@ class VpnProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  initWireguard() async {
+    log('Initializing WireGuard');
+    await _methodChannel.invokeMethod('initializeWireguard');
+  }
+
   // Connection methods
-  Future<void> connect(
-      String server, String username, String password, String secret) async {
+  Future<void> connect({
+    String server = '',
+    String username = '',
+    String password = '',
+    String secret = '',
+    String userId = '',
+    String address = '',
+    String wgPassword = '',
+  }) async {
     if (_state == VpnState.connecting || _state == VpnState.connected) {
       return;
     }
 
     try {
-      setState(VpnState.connecting);
-      final Map<String, dynamic> args = {
-        'Type': 'IPSec',
-        'Server': server,
-        'Username': username,
-        'Password': password,
-        'Secret': secret,
-        'Name': 'KestelVPN',
-        'DisconnectOnSleep': _disconnectOnSleep.toString(),
-      };
-      await _methodChannel.invokeMethod('connect', args);
+      if (protocol == VpnProtocol.wireguard) {
+        setState(VpnState.connecting);
+        _gettingConfig = true;
+
+        final String? config =
+            await getWireguardConfig(userId, address, wgPassword);
+        if (config == null) {
+          setState(VpnState.disconnected,
+              error: 'Failed to get WireGuard config');
+          return;
+        }
+        _gettingConfig = false;
+        log('WireGuard config: $config');
+        final Map<String, dynamic> args = {
+          'VpnType': 'wireguard',
+          'Server': server,
+          'WireGuardConfig': config,
+          'ProviderBundleIdentifier': 'com.kestralvpn.app.VPNExtension',
+        };
+        await _methodChannel.invokeMethod('connect', args);
+      } else {
+        setState(VpnState.connecting);
+        final Map<String, dynamic> args = {
+          'VpnType': 'ipsec',
+          'Server': server,
+          'Username': username,
+          'Password': password,
+          'Secret': secret,
+          'Name': 'KestelVPN',
+          'DisconnectOnSleep': _disconnectOnSleep.toString(),
+        };
+        await _methodChannel.invokeMethod('connect', args);
+      }
     } catch (e) {
       setState(VpnState.error, error: e.toString());
     }
@@ -140,7 +197,11 @@ class VpnProvider with ChangeNotifier {
 
     try {
       setState(VpnState.disconnecting);
-      await _methodChannel.invokeMethod('disconnect');
+      if (protocol == VpnProtocol.wireguard) {
+        await _methodChannel.invokeMethod('disconnectWireguard');
+      } else {
+        await _methodChannel.invokeMethod('disconnect');
+      }
       getCurrentIp(); // Add IP check
     } catch (e) {
       setState(VpnState.error, error: e.toString());
@@ -149,10 +210,36 @@ class VpnProvider with ChangeNotifier {
 
   Future<void> getCurrentState() async {
     try {
-      final int? stateInt =
-          await _methodChannel.invokeMethod('getCurrentState');
-      if (stateInt != null) {
-        setStateFromInt(stateInt);
+      if (protocol == VpnProtocol.wireguard) {
+        final String? state =
+            await _methodChannel.invokeMethod('getWireguardStatus');
+        print('WireGuard state: $state');
+        if (isGettingConfig) {
+          setState(VpnState.connecting);
+          return;
+        }
+        if (state != null) {
+          if (state == 'connected') {
+            setState(VpnState.connected);
+          } else if (state == 'disconnected') {
+            setState(VpnState.disconnected);
+          } else if (state == 'connecting') {
+            setState(VpnState.connecting);
+          } else if (state == 'disconnecting') {
+            setState(VpnState.disconnecting);
+          } else {
+            setState(VpnState.error, error: state);
+          }
+        }
+      } else {
+        final Map<String, dynamic> args = {
+          'VpnType': protocol == VpnProtocol.wireguard ? 'wireguard' : 'ipsec',
+        };
+        final int? stateInt =
+            await _methodChannel.invokeMethod('getCurrentState', args);
+        if (stateInt != null) {
+          setStateFromInt(stateInt);
+        }
       }
     } catch (e) {
       setState(VpnState.error, error: e.toString());
@@ -249,6 +336,51 @@ class VpnProvider with ChangeNotifier {
     _connectedTime = Duration.zero;
     _connectionStartTime = null;
     _errorMessage = null;
+  }
+
+  // Add these functions after your existing getters
+
+  // Function to change VPN protocol
+  Future<void> changeProtocol(VpnProtocol newProtocol) async {
+    if (_state == VpnState.connected || _state == VpnState.connecting) {
+      // Disconnect current VPN connection before changing protocol
+      await disconnect();
+    }
+
+    _protocol = newProtocol;
+
+    // Save the protocol preference
+    await _prefs.setString('vpn_protocol', newProtocol.toString());
+
+    // If we were connected, try to reconnect with new protocol
+    if (_state == VpnState.connected) {
+      // Implement reconnect logic based on protocol
+      if (newProtocol == VpnProtocol.wireguard) {
+        await initWireguard();
+      }
+    }
+
+    notifyListeners();
+  }
+
+  // Function to load saved protocol preference
+  Future<void> _loadSavedProtocol() async {
+    _prefs = await SharedPreferences.getInstance();
+    final savedProtocol = _prefs.getString('vpn_protocol');
+    if (savedProtocol != null) {
+      _protocol = VpnProtocol.values.firstWhere(
+        (p) => p.toString() == savedProtocol,
+        orElse: () => VpnProtocol.wireguard,
+      );
+    }
+  }
+
+  //wireguard get config
+  Future<String?> getWireguardConfig(userId, address, password) async {
+    final String? config =
+        await ApiService().getConfig(userId, address, password);
+    log('WireGuard config: $config');
+    return config;
   }
 
   @override

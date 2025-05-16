@@ -48,6 +48,7 @@ dependencies:
   speed_test_dart: ^1.0.5+0
   cached_network_image:
   url_launcher:
+  device_info_plus: ^11.4.0
 
 dev_dependencies:
   flutter_test:

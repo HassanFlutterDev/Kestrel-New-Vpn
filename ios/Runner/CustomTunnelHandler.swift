@@ -5,7 +5,6 @@
 //  Created by Hassan on 11/05/2025.
 //
 
-
 #if os(iOS)
 import Flutter
 import UIKit
@@ -18,258 +17,206 @@ import Cocoa
 
 import NetworkExtension
 
-// Custom protocols for dependency injection
-protocol TunnelProviderManaging {
-    func configureTunnel(config: TunnelConfiguration, completion: @escaping (Result<Bool, TunnelError>) -> Void)
-    func terminateTunnel(completion: @escaping (Result<Bool, TunnelError>) -> Void)
-}
+/// Main handler for WireGuard VPN operations, exposed to Flutter.
+public class WireguardHandler {
+    public static var vpnUtility = VPNUtility()
+    public static var eventSink: FlutterEventSink?
+    private var isInitialized = false
 
-protocol TunnelStateReporting {
-    var currentTunnelState: TunnelState { get }
-    func monitorState(callback: @escaping (TunnelState) -> Void)
-}
-
-// Custom enums for better type safety
-enum TunnelState: String {
-    case active = "connected"
-    case establishing = "connecting"
-    case inactive = "disconnected"
-    case terminating = "disconnecting"
-    case unstable = "reasserting"
-    case failed = "invalid"
-    
-    static func from(vpnStatus: NEVPNStatus) -> TunnelState {
-        switch vpnStatus {
-        case .connected: return .active
-        case .connecting: return .establishing
-        case .disconnected: return .inactive
-        case .disconnecting: return .terminating
-        case .reasserting: return .unstable
-        case .invalid: return .failed
-        @unknown default: return .inactive
-        }
-    }
-}
-
-enum TunnelError: Error {
-    case configurationFailure(String)
-    case operationFailure(String)
-    case invalidState(String)
-    case systemError(Error)
-}
-
-struct TunnelConfiguration {
-    let serverEndpoint: String
-    let tunnelProtocolConfig: String
-    let bundleIdentifier: String
-    let description: String
-}
-
-// Main handler with dependency injection
-@available(iOS 15.0, *)
-public class SecureTunnelHandler {
-    private let tunnelManager: TunnelProviderManaging
-    private let stateReporter: TunnelStateReporting
-    private var isReady: Bool = false
-    
-    public static let shared = SecureTunnelHandler()
-    private static let queue = DispatchQueue(label: "com.securetunnel.handler")
-    
-    init(tunnelManager: TunnelProviderManaging = DefaultTunnelManager(),
-         stateReporter: TunnelStateReporting = DefaultTunnelStateReporter()) {
-        self.tunnelManager = tunnelManager
-        self.stateReporter = stateReporter
-    }
-    
-    public func prepareTunnel(description: String, result: @escaping FlutterResult) {
+    /// Prepares the VPN manager with a description.
+    public func setup(description: String, result: @escaping FlutterResult) {
         guard !description.isEmpty else {
-            result(FlutterError(code: "CONFIG_ERROR",
-                              message: "Invalid tunnel description provided",
-                              details: nil))
+            result(FlutterError(code: "-3", message: "Description is empty", details: nil))
             return
         }
-        
-        SecureTunnelHandler.queue.async { [weak self] in
-            self?.isReady = true
-            result(self?.stateReporter.currentTunnelState.rawValue)
-        }
-    }
-    
-    public func establishTunnel(server: String, config: String, bundleId: String, result: @escaping FlutterResult) {
-        let tunnelConfig = TunnelConfiguration(
-            serverEndpoint: server,
-            tunnelProtocolConfig: config,
-            bundleIdentifier: bundleId,
-            description: "SecureTunnel"
-        )
-        
-        SecureTunnelHandler.queue.async { [weak self] in
-            self?.tunnelManager.configureTunnel(config: tunnelConfig) { tunnelResult in
-                switch tunnelResult {
-                case .success(let established):
-                    result(established)
-                case .failure(let error):
-                    result(FlutterError(code: "TUNNEL_ERROR",
-                                      message: error.localizedDescription,
-                                      details: nil))
-                }
+        WireguardHandler.vpnUtility.vpnDescription = description
+        WireguardHandler.vpnUtility.prepareManager { error in
+            if let error = error {
+                result(FlutterError(code: "-4", message: error.localizedDescription, details: nil))
+            } else {
+                result(WireguardHandler.vpnUtility.statusString())
             }
         }
+        self.isInitialized = true
     }
-    
-    public func terminateTunnel(result: @escaping FlutterResult) {
-        SecureTunnelHandler.queue.async { [weak self] in
-            self?.tunnelManager.terminateTunnel { tunnelResult in
-                switch tunnelResult {
-                case .success(let terminated):
-                    result(terminated)
-                case .failure(let error):
-                    result(FlutterError(code: "TERMINATION_ERROR",
-                                      message: error.localizedDescription,
-                                      details: nil))
-                }
-            }
-        }
-    }
-    
-    // Add this public method
-    public func getCurrentState() -> String {
-        return stateReporter.currentTunnelState.rawValue
-    }
-}
 
-// Default implementations
-@available(iOS 15.0, *)
-class DefaultTunnelManager: TunnelProviderManaging {
-    private var providerManager: NETunnelProviderManager?
-    
-    func configureTunnel(config: TunnelConfiguration, completion: @escaping (Result<Bool, TunnelError>) -> Void) {
-        NETunnelProviderManager.loadAllFromPreferences { [weak self] managers, error in
-            if let error = error {
-                completion(.failure(.systemError(error)))
-                return
-            }
-            
-            self?.providerManager = managers?.first ?? NETunnelProviderManager()
-            let customProtocol = NETunnelProviderProtocol()
-            customProtocol.providerBundleIdentifier = config.bundleIdentifier
-            customProtocol.serverAddress = config.serverEndpoint
-            customProtocol.providerConfiguration = ["tunnelConfig": config.tunnelProtocolConfig]
-            
-            self?.providerManager?.protocolConfiguration = customProtocol
-            self?.providerManager?.isEnabled = true
-            
-            self?.saveAndStartTunnel(completion: completion)
+    /// Starts a WireGuard VPN connection.
+    public func start(server: String, config: String, bundleId: String, result: @escaping FlutterResult) {
+        WireguardHandler.vpnUtility.activateVPN(
+            server: server,
+            config: config,
+            bundleId: bundleId
+        ) { success in
+            result(success)
         }
     }
-    
-    private func saveAndStartTunnel(completion: @escaping (Result<Bool, TunnelError>) -> Void) {
-        providerManager?.saveToPreferences { [weak self] error in
-            if let error = error {
-                completion(.failure(.operationFailure(error.localizedDescription)))
-                return
-            }
-            
-            self?.providerManager?.loadFromPreferences { error in
-                if let error = error {
-                    completion(.failure(.operationFailure(error.localizedDescription)))
-                    return
-                }
-                
-                guard let session = self?.providerManager?.connection as? NETunnelProviderSession else {
-                    completion(.failure(.invalidState("Invalid tunnel session")))
-                    return
-                }
-                
-                do {
-                    try session.startTunnel()
-                    completion(.success(true))
-                } catch {
-                    completion(.failure(.systemError(error)))
-                }
-            }
-        }
-    }
-    
-    func terminateTunnel(completion: @escaping (Result<Bool, TunnelError>) -> Void) {
-        NETunnelProviderManager.loadAllFromPreferences { managers, error in
-            if let error = error {
-                completion(.failure(.systemError(error)))
-                return
-            }
-            
-            guard let session = managers?.first?.connection as? NETunnelProviderSession else {
-                completion(.failure(.invalidState("No active tunnel found")))
-                return
-            }
-            
-            session.stopTunnel()
-            completion(.success(true))
+
+    /// Stops the WireGuard VPN connection.
+    public func stop(result: @escaping FlutterResult) {
+        WireguardHandler.vpnUtility.deactivateVPN { success in
+            result(success)
         }
     }
 }
 
-@available(iOS 15.0, *)
-class DefaultTunnelStateReporter: TunnelStateReporting {
-    var currentTunnelState: TunnelState {
-        // Create a semaphore to handle async code in sync property
-        let semaphore = DispatchSemaphore(value: 0)
-        var state: TunnelState = .inactive
-        
-        NETunnelProviderManager.loadAllFromPreferences { managers, error in
-            defer { semaphore.signal() }
-            
-            if let error = error {
-                NSLog("Error loading preferences: \(error.localizedDescription)")
-                state = .failed
-                return
-            }
-            
-            guard let manager = managers?.first else {
-                state = .inactive
-                return
-            }
-            
-            state = TunnelState.from(vpnStatus: manager.connection.status)
-        }
-        
-        // Wait for async operation to complete
-        _ = semaphore.wait(timeout: .now() + 2.0)
-        return state
-    }
-    
-    func monitorState(callback: @escaping (TunnelState) -> Void) {
-        NotificationCenter.default.addObserver(
-            forName: .NEVPNStatusDidChange,
-            object: nil,
-            queue: .main
-        ) { notification in
-            guard let connection = notification.object as? NEVPNConnection else { return }
-            callback(TunnelState.from(vpnStatus: connection.status))
-        }
-    }
-}
+/// Listens for VPN status changes and streams them to Flutter.
+class VPNStatusStreamHandler: NSObject, FlutterStreamHandler {
+    private var statusSink: FlutterEventSink?
+    private var observer: NSObjectProtocol?
 
-// Flutter stream handler implementation
-class TunnelStateStreamHandler: NSObject, FlutterStreamHandler {
-    private var eventSink: FlutterEventSink?
-    private let stateReporter: TunnelStateReporting
-    
-    init(stateReporter: TunnelStateReporting = DefaultTunnelStateReporter()) {
-        self.stateReporter = stateReporter
-        super.init()
-    }
-    
     func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-        eventSink = events
-        stateReporter.monitorState { [weak self] state in
-            self?.eventSink?(state.rawValue)
+        if let obs = observer {
+            NotificationCenter.default.removeObserver(obs)
+        }
+        observer = NotificationCenter.default.addObserver(
+            forName: NSNotification.Name.NEVPNStatusDidChange,
+            object: nil,
+            queue: nil
+        ) { [weak self] notification in
+            guard let self = self,
+                  let sink = self.statusSink,
+                  let conn = notification.object as? NEVPNConnection else { return }
+            sink(WireguardHandler.vpnUtility.statusString(for: conn.status))
+        }
+        self.statusSink = events
+
+        NETunnelProviderManager.loadAllFromPreferences { managers, _ in
+            events(WireguardHandler.vpnUtility.statusString(for: managers?.first?.connection.status))
         }
         return nil
     }
-    
+
     func onCancel(withArguments arguments: Any?) -> FlutterError? {
-        eventSink = nil
+        if let obs = observer {
+            NotificationCenter.default.removeObserver(obs)
+        }
+        statusSink = nil
         return nil
+    }
+}
+
+@available(iOS 15.0, *)
+public class VPNUtility {
+    var manager: NETunnelProviderManager?
+    var bundleId: String?
+    var vpnDescription: String?
+    var groupId: String?
+    var server: String?
+    var eventSink: FlutterEventSink?
+
+    /// Loads or creates the VPN manager.
+    func prepareManager(completion: @escaping (Error?) -> Void) {
+        NETunnelProviderManager.loadAllFromPreferences { managers, error in
+            if let error = error {
+                completion(error)
+            } else {
+                self.manager = managers?.first ?? NETunnelProviderManager()
+                completion(nil)
+            }
+        }
+    }
+
+    func statusString(for status: NEVPNStatus? = nil) -> String {
+        let state = status ?? manager?.connection.status
+        
+        // Debug logging
+        debugPrint("Converting VPN status: \(String(describing: state))")
+        
+        switch state {
+        case .connected:
+            return "connected"
+        case .connecting:
+            return "connecting"
+        case .disconnected:
+            return "disconnected"
+        case .disconnecting:
+            return "disconnecting"
+        case .invalid:
+            // Check if we actually have an active connection despite invalid status
+            if let manager = self.manager,
+               manager.isEnabled,
+               manager.protocolConfiguration != nil {
+                return "connected"
+            }
+            return "invalid"
+        case .reasserting:
+            return "connecting"
+        case .none:
+            return "disconnected"
+        @unknown default:
+            return "disconnected"
+        }
+    }
+
+    /// Returns the current VPN status as a string.
+    func statusString() -> String {
+        return statusString(for: manager?.connection.status)
+    }
+
+    /// Configures and starts the VPN tunnel.
+    func activateVPN(
+        server: String,
+        config: String,
+        bundleId: String,
+        completion: @escaping (Bool) -> Void
+    ) {
+        NETunnelProviderManager.loadAllFromPreferences { managers, error in
+            if error != nil {
+                completion(false)
+                return
+            }
+            let tunnelManager = self.manager ?? NETunnelProviderManager()
+            let proto = NETunnelProviderProtocol()
+            proto.providerBundleIdentifier = bundleId
+            proto.serverAddress = server
+            proto.providerConfiguration = ["wgQuickConfig": config]
+            tunnelManager.protocolConfiguration = proto
+            tunnelManager.isEnabled = true
+
+            tunnelManager.saveToPreferences { error in
+                if error != nil {
+                    completion(false)
+                    return
+                }
+                tunnelManager.loadFromPreferences { error in
+                    if error != nil {
+                        completion(false)
+                        return
+                    }
+                    guard let session = tunnelManager.connection as? NETunnelProviderSession else {
+                        completion(false)
+                        return
+                    }
+                    do {
+                        try session.startTunnel(options: nil)
+                        completion(true)
+                    } catch {
+                        completion(false)
+                    }
+                }
+            }
+        }
+    }
+
+    /// Stops the VPN tunnel if running.
+    func deactivateVPN(completion: @escaping (Bool) -> Void) {
+        NETunnelProviderManager.loadAllFromPreferences { managers, error in
+            if error != nil {
+                completion(false)
+                return
+            }
+            guard let tunnelManager = managers?.first,
+                  let session = tunnelManager.connection as? NETunnelProviderSession else {
+                completion(false)
+                return
+            }
+            switch session.status {
+            case .connected, .connecting, .reasserting:
+                session.stopTunnel()
+                completion(true)
+            default:
+                completion(false)
+            }
+        }
     }
 }

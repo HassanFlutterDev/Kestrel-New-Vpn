@@ -565,18 +565,27 @@ class _HomePageState extends State<HomePage> {
                         var serverProvider =
                             Provider.of<HomeProvider>(context, listen: false);
                         await vpnProvider.connect(
-                            serverProvider
-                                    .servers[serverProvider.selectedServerIndex]
-                                ['sub_servers'][0]['ipsec_server'],
-                            serverProvider
-                                    .servers[serverProvider.selectedServerIndex]
-                                ['sub_servers'][0]['ipsec_user'],
-                            serverProvider
-                                    .servers[serverProvider.selectedServerIndex]
-                                ['sub_servers'][0]['ipsec_password'],
-                            serverProvider
-                                    .servers[serverProvider.selectedServerIndex]
-                                ['sub_servers'][0]['ipsec_key']);
+                          server: serverProvider
+                                  .servers[serverProvider.selectedServerIndex]
+                              ['sub_servers'][0]['ipsec_server'],
+                          username: serverProvider
+                                  .servers[serverProvider.selectedServerIndex]
+                              ['sub_servers'][0]['ipsec_user'],
+                          password: serverProvider
+                                  .servers[serverProvider.selectedServerIndex]
+                              ['sub_servers'][0]['ipsec_password'],
+                          secret: serverProvider
+                                  .servers[serverProvider.selectedServerIndex]
+                              ['sub_servers'][0]['ipsec_key'],
+                          userId: serverProvider.deviceId
+                              .toString(), // Replace with actual user ID
+                          address: serverProvider
+                                  .servers[serverProvider.selectedServerIndex]
+                              ['sub_servers'][0]['wg_panel_address'],
+                          wgPassword: serverProvider
+                                  .servers[serverProvider.selectedServerIndex]
+                              ['sub_servers'][0]['wg_panel_password'],
+                        );
                       }
                     },
                     child: VpnButton(

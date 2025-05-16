@@ -41,6 +41,7 @@ class VPNStreamHandler: NSObject, FlutterStreamHandler {
     }
     private let keychainService = KeychainService()
     private var isConfigSaved = false
+    private var wireguardPlugin: WireguardHandler?
     
     private override init() {
         super.init()
@@ -116,13 +117,12 @@ class VPNStreamHandler: NSObject, FlutterStreamHandler {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
-        GeneratedPluginRegistrant.register(with: self)
-        //     if #available(iOS 10.0, *) {
-        //   UNUserNotificationCenter.current().delegate = self as UNUserNotificationCenterDelegate
-        // }
         
-
+        GeneratedPluginRegistrant.register(with: self)
+        
         let controller: FlutterViewController = window?.rootViewController as! FlutterViewController
+        
+        // Register IPSec channels
         let vpnControlM = FlutterMethodChannel(
             name: METHOD_CHANNEL_VPN_CONTROL, binaryMessenger: controller.binaryMessenger)
         let vpnStageE = FlutterEventChannel(
@@ -131,25 +131,75 @@ class VPNStreamHandler: NSObject, FlutterStreamHandler {
         let streamHandler = VPNStreamHandler(appDelegate: self)
         vpnStageE.setStreamHandler(streamHandler)
         
-        vpnControlM.setMethodCallHandler { (call: FlutterMethodCall, result: @escaping FlutterResult) in
+        // Register WireGuard handler
+        wireguardPlugin = WireguardHandler()
+        
+        vpnControlM.setMethodCallHandler { [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) in
+            guard let self = self else { return }
+            
             switch call.method {
+                
+            case "initializeWireguard":
+                let wireguard = WireguardHandler()
+                wireguard.setup(description: "Kestrel VPN", result: result)
+                break;
             case "connect":
                 guard let args = call.arguments as? [String: String] else {
                     result(FlutterError(code: "INVALID_ARGUMENTS", message: "Arguments for 'connect' method are missing or invalid", details: nil))
                     return
                 }
-                self.connect(
-                    result: result,
-                    vpnType: "ipsec",
-                    vpnServer: args["Server"] ?? "",
-                    vpnUsername: args["Username"] ?? "",
-                    vpnPassword: args["Password"] ?? "",
-                    vpnSecret: args["Secret"],
-                    vpnDescription: "KestrelVPN",
-                    disconnectOnSleep: args["DisconnectOnSleep"]=="true"
-                )
+                
+                // Check VPN type and route accordingly
+                let vpnType = args["VpnType"] ?? "ipsec"
+                
+                if vpnType == "wireguard" {
+                    // Handle WireGuard connection
+                    guard let wgConfig = args["WireGuardConfig"],
+                          let serverAddress = args["Server"],
+                          let bundleId = args["ProviderBundleIdentifier"] else {
+                        result(FlutterError(code: "INVALID_CONFIG", message: "WireGuard configuration is missing required parameters", details: nil))
+                        return
+                    }
+                    
+                    debugPrint("Wireguard is connecting")
+                    print("Connecting Wireguard.....")
+                    
+                    // Initialize WireGuard
+                    WireguardHandler.vpnUtility.activateVPN(
+                        server: serverAddress,
+                        config: wgConfig,
+                        bundleId: bundleId
+                    ) { success in
+                        result(success)
+                    }
+                } else {
+                    // Handle IPSec connection
+                    self.connect(
+                        result: result,
+                        vpnType: "ipsec",
+                        vpnServer: args["Server"] ?? "",
+                        vpnUsername: args["Username"] ?? "",
+                        vpnPassword: args["Password"] ?? "",
+                        vpnSecret: args["Secret"],
+                        vpnDescription: "KestrelVPN",
+                        disconnectOnSleep: args["DisconnectOnSleep"] == "true"
+                    )
+                }
+                
+            case "disconnectWireguard":
+                self.wireguardPlugin?.stop(result: result)
+                
             case "disconnect":
-                self.vpnManager.connection.stopVPNTunnel()
+                // Check current VPN type and disconnect accordingly
+                
+                    self.vpnManager.connection.stopVPNTunnel()
+                    result(nil)
+                
+            case "getWireguardStatus":
+                // Check WireGuard status
+                let wgStatus = WireguardHandler.vpnUtility.statusString()
+                    debugPrint("Wiregaurd Status: \(wgStatus)")
+                    result(wgStatus)
                 
             case "getCurrentState":
                 
@@ -231,7 +281,11 @@ class VPNStreamHandler: NSObject, FlutterStreamHandler {
                 result(FlutterMethodNotImplemented)
             }
         }
+        
+        
+        
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+        
     }
 
     @available(iOS 9.0, *)

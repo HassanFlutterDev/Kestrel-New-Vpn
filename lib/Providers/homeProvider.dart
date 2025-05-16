@@ -16,7 +16,7 @@ import 'package:krestelvpn/Providers/authProvider.dart';
 import 'package:krestelvpn/Providers/vpnProvider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:device_info_plus/device_info_plus.dart';
 import '../Helper/plans.dart';
 
 class HomeProvider with ChangeNotifier {
@@ -30,6 +30,10 @@ class HomeProvider with ChangeNotifier {
   int get selectedServerIndex => _selectedServerIndex;
   String _selectedPlanID = '';
   String get selectedPlanId => _selectedPlanID;
+
+  // Add Device ID property
+  String? _deviceId;
+  String? get deviceId => _deviceId;
 
   // Add user data property
   Map<String, dynamic>? _userData;
@@ -70,6 +74,7 @@ class HomeProvider with ChangeNotifier {
   HomeProvider() {
     _inAppPurchase = InAppPurchase.instance;
     _initPurchases();
+    getDeviceId();
   }
 
   Future<void> _initPurchases() async {
@@ -108,6 +113,18 @@ class HomeProvider with ChangeNotifier {
       // await _inAppPurchase.restorePurchases();
       notifyListeners();
     }
+  }
+
+  getDeviceId() async {
+    final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
+    if (Platform.isAndroid) {
+      final AndroidDeviceInfo androidInfo = await deviceInfoPlugin.androidInfo;
+      _deviceId = androidInfo.id; // Unique ID on Android
+    } else if (Platform.isIOS) {
+      final IosDeviceInfo iosInfo = await deviceInfoPlugin.iosInfo;
+      _deviceId = iosInfo.identifierForVendor; // Unique ID on iOS
+    }
+    notifyListeners();
   }
 
   void _updateStreamOnDone() {
@@ -397,10 +414,14 @@ class HomeProvider with ChangeNotifier {
         await Future.delayed(const Duration(seconds: 2));
       }
       vpnProvider.connect(
-          _servers[index]['sub_servers'][0]['ipsec_server'],
-          _servers[index]['sub_servers'][0]['ipsec_user'],
-          _servers[index]['sub_servers'][0]['ipsec_password'],
-          _servers[index]['sub_servers'][0]['ipsec_key']);
+        server: _servers[index]['sub_servers'][0]['ipsec_server'],
+        username: _servers[index]['sub_servers'][0]['ipsec_user'],
+        password: _servers[index]['sub_servers'][0]['ipsec_password'],
+        secret: _servers[index]['sub_servers'][0]['ipsec_key'],
+        userId: deviceId!,
+        address: _servers[index]['sub_servers'][0]['wg_panel_address'],
+        wgPassword: _servers[index]['sub_servers'][0]['wg_panel_password'],
+      );
       notifyListeners();
     }
   }
