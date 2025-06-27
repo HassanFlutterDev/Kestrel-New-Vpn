@@ -74,7 +74,9 @@ class _GuestPageState extends State<GuestPage> {
                 ),
                 const SizedBox(height: 20),
                 GestureDetector(
-                  onTap: () {
+                  onTap: () async {
+                    final prefs = await SharedPreferences.getInstance();
+                    prefs.setBool('onBoard', true);
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(builder: (context) => LogInPage()),

@@ -150,7 +150,7 @@ class VPNStreamHandler: NSObject, FlutterStreamHandler {
                 }
                 
                 // Check VPN type and route accordingly
-                let vpnType = args["VpnType"] ?? "ipsec"
+                let vpnType = args["VpnType"] ?? "ikev2"
                 
                 if vpnType == "wireguard" {
                     // Handle WireGuard connection
@@ -176,13 +176,11 @@ class VPNStreamHandler: NSObject, FlutterStreamHandler {
                     // Handle IPSec connection
                     self.connect(
                         result: result,
-                        vpnType: "ipsec",
+                        vpnType: "ikev2",
                         vpnServer: args["Server"] ?? "",
                         vpnUsername: args["Username"] ?? "",
                         vpnPassword: args["Password"] ?? "",
-                        vpnSecret: args["Secret"],
                         vpnDescription: "KestrelVPN",
-                        disconnectOnSleep: args["DisconnectOnSleep"] == "true"
                     )
                 }
                 
@@ -220,6 +218,11 @@ class VPNStreamHandler: NSObject, FlutterStreamHandler {
                 @unknown default:
                     debugPrint("Unknown switch statement: \(self.vpnStatus)")
                 }
+
+            case "cleanupVPNs":
+    WireguardHandler.cleanupAllVPNConfigurations { success in
+        result(success)
+    }
 
             case "getTrafficStats":
                 guard let connection = self.vpnManager.connection as? NETunnelProviderSession,
@@ -295,9 +298,7 @@ class VPNStreamHandler: NSObject, FlutterStreamHandler {
         vpnServer: String,
         vpnUsername: String,
         vpnPassword: String,
-        vpnSecret: String?,
         vpnDescription: String?,
-        disconnectOnSleep: Bool
     ) {
         vpnManager.loadFromPreferences { error in
             guard error == nil else {
@@ -308,31 +309,47 @@ class VPNStreamHandler: NSObject, FlutterStreamHandler {
             }
 
             let passwordKey = "vpn_\(vpnType)_password"
-            let secretKey = "vpn_\(vpnType)_secret"
-            self.keychainService.saveItem(k: passwordKey, v: vpnPassword)
-            if let secret = vpnSecret {
-                self.keychainService.saveItem(k: secretKey, v: secret)
-            }
+                self.keychainService.saveItem(k: passwordKey, v: vpnPassword)
 
-            let protocolConfig = NEVPNProtocolIPSec()
-            protocolConfig.serverAddress = vpnServer
-            protocolConfig.username = vpnUsername
-            protocolConfig.passwordReference = self.keychainService.loadItem(k: passwordKey)
-            protocolConfig.authenticationMethod = .sharedSecret
-            if let secret = vpnSecret {
-                protocolConfig.sharedSecretReference = self.keychainService.loadItem(k: secretKey)
-            }
-            protocolConfig.localIdentifier = ""
-            protocolConfig.remoteIdentifier = ""
+            // Configure IKEv2 protocol
+            let ikev2Protocol = NEVPNProtocolIKEv2()
             
-            protocolConfig.useExtendedAuthentication = true
-            debugPrint("VPN Sleep: \(disconnectOnSleep)")
-            protocolConfig.disconnectOnSleep = disconnectOnSleep
-            self.vpnManager.protocolConfiguration = protocolConfig
+            // Server settings
+            ikev2Protocol.serverAddress = vpnServer
+            ikev2Protocol.remoteIdentifier = vpnServer // Using server address as remote identifier
             
-            self.vpnManager.localizedDescription = vpnDescription
+            // Authentication settings
+                ikev2Protocol.username = vpnUsername
+            ikev2Protocol.passwordReference = self.keychainService.loadItem(k: passwordKey)
+            ikev2Protocol.authenticationMethod = .none // Using username/password authentication
+            
+            // Extended authentication
+            ikev2Protocol.useExtendedAuthentication = true
+            
+            // IKE security association parameters
+            ikev2Protocol.ikeSecurityAssociationParameters.encryptionAlgorithm = .algorithmAES256
+            ikev2Protocol.ikeSecurityAssociationParameters.integrityAlgorithm = .SHA256
+            ikev2Protocol.ikeSecurityAssociationParameters.diffieHellmanGroup = .group14
+            ikev2Protocol.ikeSecurityAssociationParameters.lifetimeMinutes = 1440
+            
+            // Child security association parameters
+            ikev2Protocol.childSecurityAssociationParameters.encryptionAlgorithm = .algorithmAES256
+            ikev2Protocol.childSecurityAssociationParameters.integrityAlgorithm = .SHA256
+            ikev2Protocol.childSecurityAssociationParameters.diffieHellmanGroup = .group14
+            ikev2Protocol.childSecurityAssociationParameters.lifetimeMinutes = 1440
+
+                ikev2Protocol.excludeLocalNetworks = false
+                ikev2Protocol.includeAllNetworks = true
+                ikev2Protocol.enablePFS = true
+            
+            
+            // Apply the IKEv2 protocol configuration
+            self.vpnManager.protocolConfiguration = ikev2Protocol
+
+            
+            self.vpnManager.localizedDescription = vpnDescription ?? "Kestrel VPN IKev2"
             self.vpnManager.isOnDemandEnabled = false
-
+            
             self.vpnManager.isEnabled = true
             
 

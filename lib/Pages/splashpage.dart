@@ -98,10 +98,10 @@ class SplashPage extends StatelessWidget {
                       }
 
                       // Navigate based on login status
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) async {
                         final serversProvider =
                             Provider.of<HomeProvider>(context, listen: false);
-                        serversProvider.getServers(true, context);
+                        await serversProvider.getServers(true, context);
                         if (data['onBoard']) {
                           Navigator.pushAndRemoveUntil(
                             context,

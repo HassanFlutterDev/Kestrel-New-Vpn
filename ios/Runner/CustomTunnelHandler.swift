@@ -4,16 +4,8 @@
 //
 //  Created by Hassan on 11/05/2025.
 //
-
-#if os(iOS)
 import Flutter
 import UIKit
-#elseif os(macOS)
-import FlutterMacOS
-import Cocoa
-#else
-#error("Unsupported platform")
-#endif
 
 import NetworkExtension
 
@@ -55,6 +47,43 @@ public class WireguardHandler {
     public func stop(result: @escaping FlutterResult) {
         WireguardHandler.vpnUtility.deactivateVPN { success in
             result(success)
+        }
+    }
+
+    /// Removes all VPN configurations to start fresh
+    public static func cleanupAllVPNConfigurations(completion: @escaping (Bool) -> Void) {
+        // First clean up NEVPNManager (IKEv2)
+        let ikeManager = NEVPNManager.shared()
+        ikeManager.removeFromPreferences { error in
+            // Now clean up NETunnelProviderManager (WireGuard)
+            NETunnelProviderManager.loadAllFromPreferences { managers, error in
+                if let error = error {
+                    completion(false)
+                    return
+                }
+                
+                guard let managers = managers, !managers.isEmpty else {
+                    completion(true)
+                    return
+                }
+                
+                let group = DispatchGroup()
+                var success = true
+                
+                for manager in managers {
+                    group.enter()
+                    manager.removeFromPreferences { error in
+                        if error != nil {
+                            success = false
+                        }
+                        group.leave()
+                    }
+                }
+                
+                group.notify(queue: .main) {
+                    completion(success)
+                }
+            }
         }
     }
 }

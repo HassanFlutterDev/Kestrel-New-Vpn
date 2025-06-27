@@ -43,6 +43,7 @@ class AuthProvider with ChangeNotifier {
               }));
 
       var data = jsonDecode(request.body);
+      log(data.toString());
       String message =
           data['message'].toString().replaceAll('[', '').replaceAll(']', '');
 
@@ -51,7 +52,10 @@ class AuthProvider with ChangeNotifier {
         await prefs.setBool('isLoggedIn', true);
         await prefs.setString('email', emailController.text);
         await prefs.setString('password', passwordController.text);
+        await prefs.setString('name', data['user']['email']);
         await prefs.setString('token', data['access_token']);
+        var homeProvider = Provider.of<HomeProvider>(context, listen: false);
+        await homeProvider.getServers(true, context);
 
         showCustomSnackBar(context, EvaIcons.checkmarkCircle2Outline, 'Success',
             message, Colors.green);

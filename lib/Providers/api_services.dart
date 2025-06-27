@@ -1,99 +1,156 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  final client = http.Client();
-  // Fetch token from API
-  Future<String?> fetchToken(String address, String password) async {
-    final response = await http.post(
-      Uri.parse('$address/api/session'),
-      headers: {
-        'User-Agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:127.0) Gecko/20100101 Firefox/127.0',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({'password': password}),
-    );
-
-    log(response.headers.toString());
-
-    return response.headers['set-cookie']; // Get cookie
-  }
-
-  // Perform action using token
-  Future<String> performAction(
-      String address, String password, String method, String? endpoint,
-      {Map<String, dynamic>? params}) async {
-    String? token = await fetchToken(address, password);
-
-    if (token == null) return '';
-
-    final response = http.Request(
-        method, Uri.parse('$address/api/wireguard/client$endpoint'))
-      ..headers.addAll({
-        'User-Agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:127.0) Gecko/20100101 Firefox/127.0',
-        'Content-Type': 'application/json',
-        'Cookie': token,
-      });
-
-    if (params != null) {
-      response.body = jsonEncode(params);
-    }
-
-    final streamedResponse = await response.send();
-    return await http.Response.fromStream(streamedResponse)
-        .then((res) => res.body);
-  }
-
-  // Extract values from configuration
-  String? extractValue(String pattern, String text) {
-    RegExp regex = RegExp(pattern);
-    var match = regex.firstMatch(text);
-    return match?.group(1);
-  }
-
   // Get configuration for a user
-  Future<String?> getConfig(
-      String userId, String address, String password) async {
-    var json = await performAction(address, password, 'GET', '');
-    final list = jsonDecode(json);
-    // log(list.toString());
-    String? conf;
-
-    bool isUser = false;
-
-    for (var row in list) {
-      if (row['name'] == userId) {
-        log('User found');
-        conf = await performAction(
-            address, password, 'GET', '/${row['id']}/configuration');
-        isUser = true;
-        break;
+  Future<String?> getConfig(String userId, String address) async {
+    var isRegistered = await registerUserInServer(address, userId);
+    if (!isRegistered) {
+      log("❌ User registration failed on $address");
+      return null;
+    } else {
+      log("✅ User registered successfully on $address");
+      // now fetch the configuration
+      var config = await getSelectedWireguardVPNConfig(address, userId);
+      if (config == null) {
+        log("❌ Failed to fetch WireGuard config from $address");
+        return null;
+      } else {
+        log("✅ WireGuard config fetched successfully from $address");
+        return config;
       }
     }
-    if (isUser == false) {
-      var res = await performAction(address, password, 'POST', '', params: {
-        'name': userId,
-      });
-      var json2 = await performAction(address, password, 'GET', '');
-      final list2 = jsonDecode(json2);
-      for (var row in list2) {
-        if (row['name'] == userId) {
-          conf = await performAction(
-              address, password, 'GET', '/${row['id']}/configuration');
-          isUser = true;
-          break;
+  }
+
+  Future<String?> getSelectedWireguardVPNConfig(
+      String serverUrl, userId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      final String? name = prefs.getString('name') ?? userId;
+
+      if (name == null) {
+        log("❌ Name or password is missing");
+        return null;
+      }
+
+      final String platform = Platform.isAndroid
+          ? 'android'
+          : Platform.isIOS
+              ? 'ios'
+              : Platform.isWindows
+                  ? 'windows'
+                  : 'macos';
+
+      const headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-API-Token': 'a3f7b9c2-d1e5-4f68-8a0b-95c6e7f4d8a1',
+      };
+
+      // Make API call to get WireGuard config
+      final response = await http.get(
+        Uri.parse(
+          "http://$serverUrl:5000/api/clients/${name.replaceAll(' ', '-')}_$platform",
+        ),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+
+        // Extract config from response
+        final String wireguardConfig = responseData['config'];
+        final String ipAddress = responseData['ip'];
+        final String clientName = responseData['name'];
+        final String qrCode = responseData['qr_code'];
+
+        log("WireGuard config saved successfully in GetStorage");
+        return wireguardConfig;
+      } else {
+        log("Failed to get WireGuard config: ${response.statusCode}");
+        return null;
+      }
+    } catch (e) {
+      log("Error getting WireGuard config: $e");
+      return null;
+    }
+  }
+
+  Future<bool> registerUserInServer(String serverUrl, userId) async {
+    log("🔵 Registering user in VPS server: $serverUrl");
+    try {
+      log("🔵 Registering user in VPS server: $serverUrl");
+      final prefs = await SharedPreferences.getInstance();
+
+      final String? name = prefs.getString('name') ?? userId;
+
+      if (name == null) {
+        log("❌ Name or password is missing");
+        return false;
+      }
+
+      final String platform = Platform.isAndroid
+          ? 'android'
+          : Platform.isIOS
+              ? 'ios'
+              : 'desktop';
+
+      const headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-API-Token': 'a3f7b9c2-d1e5-4f68-8a0b-95c6e7f4d8a1',
+      };
+
+      final firstResponse = await http
+          .post(
+            Uri.parse("http://$serverUrl:5000/api/clients/generate"),
+            headers: headers,
+            body: jsonEncode({
+              "name": "${name.replaceAll(' ', '-')}_$platform",
+            }),
+          )
+          .timeout(const Duration(seconds: 2));
+      log("🔵 First response status code: ${firstResponse.body}");
+      final firstBody = jsonDecode(firstResponse.body);
+
+      if (firstBody["error"] != null) {
+        var response = await http.delete(
+          Uri.parse(
+            "http://$serverUrl:5000/api/clients/${name.replaceAll(' ', '-')}_$platform",
+          ),
+          headers: headers,
+        );
+        log("🔵 Deletion response status code: ${response.statusCode}");
+        if (response.statusCode == 200) {
+          final newResponse = await http.post(
+            Uri.parse("http://$serverUrl:5000/api/clients/generate"),
+            headers: headers,
+            body: jsonEncode({
+              "name": "${name.replaceAll(' ', '-')}_$platform",
+            }),
+          );
+
+          final responseBody = jsonDecode(newResponse.body);
+          log("🔵 New response body: $responseBody");
+          if (newResponse.statusCode == 200) {
+            log("✅ Registered successfully on $serverUrl");
+            return true;
+          } else {
+            log("❌ Registration failed on $serverUrl");
+            return false;
+          }
         }
       }
-    }
 
-    if (conf != null) {
-      return conf;
+      return true;
+    } catch (e) {
+      log("❌ Exception during registration on $serverUrl: $e");
+      return false;
     }
-    getConfig(userId, address, password);
-    return 'error';
   }
 }

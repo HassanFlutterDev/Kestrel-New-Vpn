@@ -294,8 +294,6 @@ class HomeProvider with ChangeNotifier {
         },
       ).timeout(const Duration(seconds: 10));
 
-      log(response.body.toString());
-
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
 
@@ -374,7 +372,6 @@ class HomeProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        log(response.body);
         _userData = data['user'];
         // Cache user data
         await prefs.setString('user_data', jsonEncode(_userData));
@@ -414,13 +411,14 @@ class HomeProvider with ChangeNotifier {
         await Future.delayed(const Duration(seconds: 2));
       }
       vpnProvider.connect(
-        server: _servers[index]['sub_servers'][0]['ipsec_server'],
+        server: _servers[index]['sub_servers'][0]['ip_address'],
         username: _servers[index]['sub_servers'][0]['ipsec_user'],
         password: _servers[index]['sub_servers'][0]['ipsec_password'],
         secret: _servers[index]['sub_servers'][0]['ipsec_key'],
         userId: deviceId!,
         address: _servers[index]['sub_servers'][0]['wg_panel_address'],
         wgPassword: _servers[index]['sub_servers'][0]['wg_panel_password'],
+        context: context,
       );
       notifyListeners();
     }
@@ -491,7 +489,6 @@ class HomeProvider with ChangeNotifier {
           _servers = data['servers'];
           await prefs.setString('servers', jsonEncode(_servers));
           log('add local');
-
           // Log servers list
         } catch (e) {
           _servers = [];
@@ -499,6 +496,7 @@ class HomeProvider with ChangeNotifier {
       } else {
         log('no net local');
       }
+
       await getUserData(context); // Fetch user data after loading servers
       await getAllPlans(context); // Fetch plans after loading servers
     }
@@ -507,5 +505,100 @@ class HomeProvider with ChangeNotifier {
 
     _isLoading = false;
     notifyListeners();
+  }
+
+  // // Now we have to register the user in the VPS server and vps url is in sub_servers['ip_address']. now we have to get that server url and register the user in that server. we will register user at once in all servers.
+  // Future getServersUrlFromSub() async {
+  //   log("🔵 Getting servers URL from sub_servers");
+  //   for (var server in _servers) {
+  //     for (var subServer in server['sub_servers']) {
+  //       final String? serverUrl = subServer['ip_address'];
+  //       if (serverUrl != null && serverUrl.isNotEmpty) {
+  //         bool registered = await registerUserInVPS('http://$serverUrl:5000');
+  //         if (registered) {
+  //           log("✅ User registered successfully in VPS server: $serverUrl");
+  //         } else {
+  //           log("❌ Failed to register user in VPS server: $serverUrl");
+  //         }
+  //       } else {
+  //         log("❌ Server URL is null or empty for sub_server: ${subServer['name']}");
+  //       }
+  //     }
+  //   }
+  // }
+
+  Future<bool> registerUserInVPS(String serverUrl) async {
+    log("🔵 Registering user in VPS server: $serverUrl");
+    try {
+      log("🔵 Registering user in VPS server: $serverUrl");
+      final prefs = await SharedPreferences.getInstance();
+
+      final String? name = prefs.getString('name') ?? deviceId!;
+      final String? password = prefs.getString('password') ?? "12345678";
+      log("🔵 Name: $name, Password: $password");
+
+      if (name == null || password == null) {
+        log("❌ Name or password is missing");
+        return false;
+      }
+
+      final String platform = Platform.isAndroid
+          ? 'android'
+          : Platform.isIOS
+              ? 'ios'
+              : 'desktop';
+
+      const headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-API-Token': 'a3f7b9c2-d1e5-4f68-8a0b-95c6e7f4d8a1',
+      };
+
+      final firstResponse = await http
+          .post(
+            Uri.parse("$serverUrl/api/ikev2/clients/generate"),
+            headers: headers,
+            body: jsonEncode({
+              "name": "${name.replaceAll(' ', '-')}_$platform",
+              "password": password,
+            }),
+          )
+          .timeout(const Duration(seconds: 2));
+
+      final firstBody = jsonDecode(firstResponse.body);
+
+      if (firstBody["error"] != null) {
+        var response = await http.delete(
+          Uri.parse(
+            "$serverUrl/api/ikev2/clients/${name.replaceAll(' ', '-')}_$platform",
+          ),
+          headers: headers,
+        );
+        if (response.statusCode == 200) {
+          final newResponse = await http.post(
+            Uri.parse("$serverUrl/api/ikev2/clients/generate"),
+            headers: headers,
+            body: jsonEncode({
+              "name": "${name.replaceAll(' ', '-')}_$platform",
+              "password": password,
+            }),
+          );
+
+          final responseBody = jsonDecode(newResponse.body);
+          if (responseBody["success"] == true) {
+            log("✅ Registered successfully on $serverUrl");
+            return true;
+          } else {
+            log("❌ Registration failed on $serverUrl");
+            return false;
+          }
+        }
+      }
+
+      return true;
+    } catch (e) {
+      // log("❌ Exception during registration on $serverUrl: $e");
+      return false;
+    }
   }
 }

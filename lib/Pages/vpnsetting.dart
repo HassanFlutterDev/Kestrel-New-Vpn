@@ -65,7 +65,7 @@ class _VpnSettingState extends State<VpnSetting> {
                           child: Text(
                             protocol == VpnProtocol.wireguard
                                 ? 'WireGuard'
-                                : 'IPSec',
+                                : 'IKev2',
                           ),
                         );
                       }).toList(),

@@ -15,6 +15,7 @@ import 'package:krestelvpn/Pages/vpnsetting.dart';
 import 'package:krestelvpn/Providers/authProvider.dart';
 import 'package:krestelvpn/Providers/homeProvider.dart';
 import 'package:krestelvpn/Providers/vpnProvider.dart';
+import 'package:krestelvpn/Widgets/connectionTimer.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -481,39 +482,47 @@ class _HomePageState extends State<HomePage> {
               Consumer<VpnProvider>(
                 builder: (context, vpnProvider, child) {
                   if (vpnProvider.state == VpnState.connected) {
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    return Column(
                       children: [
-                        Row(
-                          children: [
-                            Image.asset(
-                              'assets/images/download.png',
-                              height: 20,
-                            ),
-                            SizedBox(
-                              width: 5,
-                            ),
-                            Text(
-                              '${vpnProvider.bytesIn} Kbps',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ],
-                        ),
+                        ConnectionTimer(),
                         SizedBox(
-                          width: 30,
+                          height: 10,
                         ),
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Image.asset(
-                              'assets/images/upload.png',
-                              height: 20,
+                            Row(
+                              children: [
+                                Image.asset(
+                                  'assets/images/download.png',
+                                  height: 20,
+                                ),
+                                SizedBox(
+                                  width: 5,
+                                ),
+                                Text(
+                                  '${vpnProvider.bytesIn} Kbps',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ],
                             ),
                             SizedBox(
-                              width: 5,
+                              width: 30,
                             ),
-                            Text(
-                              '${vpnProvider.bytesOut} Kbps',
-                              style: TextStyle(color: Colors.white),
+                            Row(
+                              children: [
+                                Image.asset(
+                                  'assets/images/upload.png',
+                                  height: 20,
+                                ),
+                                SizedBox(
+                                  width: 5,
+                                ),
+                                Text(
+                                  '${vpnProvider.bytesOut} Kbps',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -567,7 +576,7 @@ class _HomePageState extends State<HomePage> {
                         await vpnProvider.connect(
                           server: serverProvider
                                   .servers[serverProvider.selectedServerIndex]
-                              ['sub_servers'][0]['ipsec_server'],
+                              ['sub_servers'][0]['ip_address'],
                           username: serverProvider
                                   .servers[serverProvider.selectedServerIndex]
                               ['sub_servers'][0]['ipsec_user'],
@@ -585,6 +594,7 @@ class _HomePageState extends State<HomePage> {
                           wgPassword: serverProvider
                                   .servers[serverProvider.selectedServerIndex]
                               ['sub_servers'][0]['wg_panel_password'],
+                          context: context,
                         );
                       }
                     },
